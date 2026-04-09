@@ -3,572 +3,460 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>ESP Firebase Dashboard</title>
+  <title>ESP8266 Firebase Dashboard</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
-    :root {
-      --bg: #f6f8fb;
-      --card: #ffffff;
-      --border: #dfe5ee;
-      --text: #1f2937;
-      --muted: #6b7280;
-      --accent: #2563eb;
-      --ok: #15803d;
-      --danger: #b91c1c;
+    :root{
+      --bg:#0f172a; --card:#111827; --muted:#94a3b8; --line:#1f2937;
+      --text:#e5e7eb; --accent:#22c55e; --danger:#ef4444;
     }
-    * { box-sizing: border-box; }
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background: var(--bg);
-      color: var(--text);
-    }
-    .wrap {
-      max-width: 1200px;
-      margin: 24px auto;
-      padding: 0 16px;
-    }
-    h1, h2 { margin: 0 0 12px; }
-    .section {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 16px;
-      margin-bottom: 18px;
-    }
-    .row {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-      align-items: end;
-    }
-    .row > div {
-      flex: 1 1 220px;
-    }
-    label {
-      display: block;
-      font-size: 13px;
-      color: var(--muted);
-      margin-bottom: 6px;
-    }
-    input, select, button {
-      width: 100%;
-      padding: 10px 12px;
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      font-size: 14px;
-    }
-    button {
-      cursor: pointer;
-      background: var(--accent);
-      color: #fff;
-      border: none;
-    }
-    .status {
-      margin-top: 10px;
-      font-size: 14px;
-      color: var(--muted);
-    }
-    .ok { color: var(--ok); }
-    .danger { color: var(--danger); }
-    .cards {
-      display: grid;
-      gap: 12px;
-      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-      margin-top: 12px;
-    }
-    .mini {
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 12px;
-      background: #fff;
-    }
-    .mini .value {
-      font-size: 24px;
-      font-weight: 700;
-      margin-top: 6px;
-    }
-    .table-wrap {
-      overflow: auto;
-      margin-top: 16px;
-    }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      background: #fff;
-    }
-    th, td {
-      border: 1px solid var(--border);
-      padding: 8px 10px;
-      text-align: left;
-      font-size: 14px;
-    }
-    th { background: #eef3fb; }
-    canvas {
-      margin-top: 16px;
-      background: #fff;
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 10px;
-    }
-    .hidden { display: none; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:Arial,Helvetica,sans-serif;background:var(--bg);color:var(--text)}
+    .wrap{max-width:1400px;margin:0 auto;padding:16px}
+    .grid{display:grid;gap:16px}
+    .g2{grid-template-columns:repeat(2,minmax(0,1fr))}
+    .g3{grid-template-columns:repeat(3,minmax(0,1fr))}
+    .g4{grid-template-columns:repeat(4,minmax(0,1fr))}
+    @media (max-width:980px){.g2,.g3,.g4{grid-template-columns:1fr}}
+    .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px}
+    h1,h2,h3{margin:0 0 10px}
+    label{display:block;font-size:12px;color:var(--muted);margin:10px 0 6px}
+    input,select,button{width:100%;padding:10px;border-radius:10px;border:1px solid #334155;background:#0b1220;color:var(--text)}
+    button{cursor:pointer}
+    .btn{background:#14532d;border-color:#166534}
+    .btn2{background:#1e3a8a;border-color:#1d4ed8}
+    .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+    .row > *{flex:1}
+    .stat{font-size:24px;font-weight:700}
+    .muted{color:var(--muted)}
+    .ok{color:var(--accent)}
+    .bad{color:var(--danger)}
+    table{width:100%;border-collapse:collapse;font-size:13px}
+    th,td{border-bottom:1px solid var(--line);padding:8px;text-align:left}
+    th{color:#cbd5e1;background:#0b1220;position:sticky;top:0}
+    .table-wrap{max-height:360px;overflow:auto;border:1px solid var(--line);border-radius:10px}
+    .tiny{font-size:12px}
   </style>
 </head>
 <body>
-  <div class="wrap">
-    <h1>ESP Firebase Dashboard</h1>
+<div class="wrap">
+  <h1>ESP8266 Firebase Dashboard</h1>
 
-    <div class="section">
-      <h2>Firmware Version</h2>
-      <div class="row">
-        <div>
-          <label>Current target firmware</label>
-          <input type="text" id="currentFirmware" readonly />
-        </div>
-        <div>
-          <label>Set new target firmware</label>
-          <input type="text" id="newFirmware" placeholder="e.g. 1.0.1" />
-        </div>
-        <div>
-          <button id="saveFirmwareBtn">Save Firmware Version</button>
-        </div>
-      </div>
-      <div class="status" id="firmwareStatus"></div>
+  <div class="grid g4">
+    <div class="card">
+      <label>Device</label>
+      <select id="deviceSelect"></select>
+      <div class="tiny muted" id="devicePathInfo">Path: -</div>
     </div>
-
-    <div class="section">
-      <h2>Device Analytics</h2>
-
-      <div class="row">
-        <div>
-          <label>Device</label>
-          <select id="deviceSelect"></select>
-        </div>
-        <div>
-          <label>View</label>
-          <select id="viewMode">
-            <option value="hourly">Hourly</option>
-            <option value="daily">Daily</option>
-            <option value="monthly">Monthly</option>
-          </select>
-        </div>
-        <div>
-          <label>Chart metric</label>
-          <select id="metricSelect">
-            <option value="temperature">Temperature</option>
-            <option value="humidity">Humidity</option>
-            <option value="light_status">Light Status</option>
-          </select>
-        </div>
-      </div>
-
-      <div class="row" style="margin-top:10px;">
-        <div id="hourlyPickerWrap">
-          <label>Date for hourly view</label>
-          <input type="date" id="hourlyDate" />
-        </div>
-        <div id="dailyPickerWrap" class="hidden">
-          <label>Month for daily view</label>
-          <input type="month" id="dailyMonth" />
-        </div>
-        <div id="monthlyPickerWrap" class="hidden">
-          <label>Year for monthly view</label>
-          <input type="number" id="monthlyYear" min="2020" max="2100" step="1" />
-        </div>
-        <div>
-          <button id="loadBtn">Load</button>
-        </div>
-      </div>
-
-      <div class="cards">
-        <div class="mini"><div>Current temperature</div><div class="value" id="cardTemp">-</div></div>
-        <div class="mini"><div>Current humidity</div><div class="value" id="cardHumidity">-</div></div>
-        <div class="mini"><div>Current light status</div><div class="value" id="cardLight">-</div></div>
-        <div class="mini"><div>Last seen</div><div class="value" id="cardLastSeen" style="font-size:16px;">-</div></div>
-      </div>
-
-      <div class="status" id="analyticsStatus"></div>
-      <canvas id="chart" height="120"></canvas>
-      <div class="table-wrap" id="tableWrap"></div>
+    <div class="card">
+      <label>Visibility</label>
+      <select id="groupBy">
+        <option value="raw">Raw</option>
+        <option value="hourly">Hourly</option>
+        <option value="daily">Daily</option>
+        <option value="monthly">Monthly</option>
+        <option value="yearly">Yearly</option>
+      </select>
+    </div>
+    <div class="card">
+      <label>Sensor type</label>
+      <select id="sensorType">
+        <option value="temp">Temperature</option>
+        <option value="hum">Humidity</option>
+        <option value="ldr">LDR</option>
+      </select>
+    </div>
+    <div class="card">
+      <label>Status</label>
+      <div id="status" class="tiny">Ready</div>
     </div>
   </div>
 
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
-    import {
-      getDatabase,
-      ref,
-      get,
-      onValue,
-      set
-    } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-database.js";
+  <div class="grid g2" style="margin-top:16px">
+    <div class="card">
+      <h2>Device / Firmware</h2>
+      <div class="grid g3">
+        <div>
+          <label>Device name</label>
+          <input id="deviceName" />
+        </div>
+        <div>
+          <label>Device version</label>
+          <input id="currentVersion" readonly />
+        </div>
+        <div>
+          <label>Target version</label>
+          <input id="targetVersion" placeholder="1.0.2" />
+        </div>
+      </div>
+      <div class="grid g3">
+        <div>
+          <label>Last seen</label>
+          <input id="lastSeen" readonly />
+        </div>
+        <div>
+          <label>Sensor status</label>
+          <input id="sensorStatus" readonly />
+        </div>
+        <div>
+          <label>Light fault</label>
+          <input id="lightFault" readonly />
+        </div>
+      </div>
+      <div class="row" style="margin-top:10px">
+        <button class="btn2" id="saveMetaBtn">Save name + target version</button>
+        <button id="refreshNowBtn">Reload</button>
+      </div>
+    </div>
 
-    const firebaseConfig = {
-		apiKey: "AIzaSyDZWXMSdFH-EivJySs__ZtZGUHf24R0dRQ",
-		authDomain: "pathfinder-f171e.firebaseapp.com",
-		databaseURL: "https://pathfinder-f171e-default-rtdb.asia-southeast1.firebasedatabase.app",
-		projectId: "pathfinder-f171e",
-		storageBucket: "pathfinder-f171e.firebasestorage.app",
-		messagingSenderId: "348872504232",
-		appId: "1:348872504232:web:e2067ab2881799fe58a39d"
-    };
+    <div class="card">
+      <h2>Relay Settings</h2>
+      <div class="grid g2">
+        <div>
+          <h3>Relay 1 (Light)</h3>
+          <label>Mode</label>
+          <select id="relay1Mode">
+            <option value="Manual">Manual</option>
+            <option value="Temperature_based">Temperature_based</option>
+          </select>
+          <label>Manual state</label>
+          <select id="relay1Manual">
+            <option value="0">OFF</option>
+            <option value="1">ON</option>
+          </select>
+          <label>If temperature 1 (below =&gt; ON)</label>
+          <input id="ifTemp1" type="number" step="0.1" />
+        </div>
+        <div>
+          <h3>Relay 2 (Fan)</h3>
+          <label>Mode</label>
+          <select id="relay2Mode">
+            <option value="Manual">Manual</option>
+            <option value="Temperature_based">Temperature_based</option>
+          </select>
+          <label>Manual state</label>
+          <select id="relay2Manual">
+            <option value="0">OFF</option>
+            <option value="1">ON</option>
+          </select>
+          <label>If temperature 2 (above =&gt; ON)</label>
+          <input id="ifTemp2" type="number" step="0.1" />
+        </div>
+      </div>
+      <div class="row" style="margin-top:10px">
+        <button class="btn" id="saveRelayBtn">Save relay settings</button>
+      </div>
+    </div>
+  </div>
 
-    const app = initializeApp(firebaseConfig);
-    const db = getDatabase(app);
+  <div class="grid g4" style="margin-top:16px">
+    <div class="card"><div class="muted tiny">Average temperature</div><div id="avgTemp" class="stat">-</div></div>
+    <div class="card"><div class="muted tiny">Average humidity</div><div id="avgHum" class="stat">-</div></div>
+    <div class="card"><div class="muted tiny">Average LDR</div><div id="avgLdr" class="stat">-</div></div>
+    <div class="card"><div class="muted tiny">Record count</div><div id="recordCount" class="stat">0</div></div>
+  </div>
 
-    const currentFirmware = document.getElementById("currentFirmware");
-    const newFirmware = document.getElementById("newFirmware");
-    const saveFirmwareBtn = document.getElementById("saveFirmwareBtn");
-    const firmwareStatus = document.getElementById("firmwareStatus");
+  <div class="card" style="margin-top:16px">
+    <div class="grid g4">
+      <div>
+        <label>From</label>
+        <input id="fromDate" type="date" />
+      </div>
+      <div>
+        <label>To</label>
+        <input id="toDate" type="date" />
+      </div>
+      <div style="display:flex;align-items:end"><button class="btn2" id="loadBtn">Load chart + stats</button></div>
+      <div style="display:flex;align-items:end"><button id="loadRecentBtn">Load recent table</button></div>
+    </div>
+    <div style="margin-top:16px"><canvas id="chart" height="90"></canvas></div>
+  </div>
 
-    const deviceSelect = document.getElementById("deviceSelect");
-    const viewMode = document.getElementById("viewMode");
-    const metricSelect = document.getElementById("metricSelect");
-    const hourlyDate = document.getElementById("hourlyDate");
-    const dailyMonth = document.getElementById("dailyMonth");
-    const monthlyYear = document.getElementById("monthlyYear");
-    const loadBtn = document.getElementById("loadBtn");
-    const analyticsStatus = document.getElementById("analyticsStatus");
-    const tableWrap = document.getElementById("tableWrap");
+  <div class="card" style="margin-top:16px">
+    <h2>Recent uploaded data</h2>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Time</th>
+            <th>Temp</th>
+            <th>Humidity</th>
+            <th>LDR</th>
+            <th>Relay1</th>
+            <th>Relay2</th>
+            <th>Sensor OK</th>
+            <th>Error</th>
+            <th>Light fault</th>
+          </tr>
+        </thead>
+        <tbody id="recentBody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
 
-    const hourlyPickerWrap = document.getElementById("hourlyPickerWrap");
-    const dailyPickerWrap = document.getElementById("dailyPickerWrap");
-    const monthlyPickerWrap = document.getElementById("monthlyPickerWrap");
+<script type="module">
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.7.3/firebase-app.js';
+import { getDatabase, ref, get, update, query, limitToLast, onValue } from 'https://www.gstatic.com/firebasejs/11.7.3/firebase-database.js';
 
-    const cardTemp = document.getElementById("cardTemp");
-    const cardHumidity = document.getElementById("cardHumidity");
-    const cardLight = document.getElementById("cardLight");
-    const cardLastSeen = document.getElementById("cardLastSeen");
+const firebaseConfig = {
+  apiKey: "AIzaSyDZWXMSdFH-EivJySs__ZtZGUHf24R0dRQ",
+  authDomain: "pathfinder-f171e.firebaseapp.com",
+  databaseURL: "https://pathfinder-f171e-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "pathfinder-f171e",
+  storageBucket: "pathfinder-f171e.firebasestorage.app",
+  messagingSenderId: "348872504232",
+  appId: "1:348872504232:web:e2067ab2881799fe58a39d"
+};
 
-    let chartInstance = null;
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app, firebaseConfig.databaseURL);
 
-    const now = new Date();
-    const yyyy = now.getFullYear();
-    const mm = String(now.getMonth() + 1).padStart(2, "0");
-    const dd = String(now.getDate()).padStart(2, "0");
-    hourlyDate.value = `${yyyy}-${mm}-${dd}`;
-    dailyMonth.value = `${yyyy}-${mm}`;
-    monthlyYear.value = yyyy;
+const el = (id) => document.getElementById(id);
+const statusEl = el('status');
+let currentDeviceId = '';
+let chart = null;
+let liveUnsubs = [];
 
-    onValue(ref(db, "config/target_firmware"), (snap) => {
-      const val = snap.exists() ? snap.val() : "";
-      currentFirmware.value = val;
-      if (!newFirmware.value) newFirmware.value = val;
+function setStatus(msg, bad = false) {
+  statusEl.innerHTML = bad ? `<span class="bad">${msg}</span>` : `<span class="ok">${msg}</span>`;
+}
+
+function fmtTs(tsSec) {
+  if (!tsSec) return '';
+  const d = new Date(Number(tsSec) * 1000);
+  return isNaN(d) ? '' : d.toLocaleString();
+}
+
+function yyyymmFromDate(d) {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  return `${y}${m}`;
+}
+
+function monthKeysBetween(fromDate, toDate) {
+  const keys = [];
+  let d = new Date(fromDate.getFullYear(), fromDate.getMonth(), 1);
+  const end = new Date(toDate.getFullYear(), toDate.getMonth(), 1);
+  while (d <= end) {
+    keys.push(yyyymmFromDate(d));
+    d.setMonth(d.getMonth() + 1);
+  }
+  return keys;
+}
+
+function round2(v) {
+  return Number.isFinite(v) ? Math.round(v * 100) / 100 : '-';
+}
+
+function todayStr() {
+  return new Date().toISOString().slice(0, 10);
+}
+
+function aggregate(records, sensorKey, groupBy) {
+  if (groupBy === 'raw') {
+    return records.sort((a, b) => a.ts - b.ts).map(r => ({ label: fmtTs(r.ts), value: Number(r[sensorKey]) }));
+  }
+  const map = {};
+  for (const r of records) {
+    const d = new Date(Number(r.ts) * 1000);
+    let key = '';
+    if (groupBy === 'hourly') key = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')} ${String(d.getHours()).padStart(2,'0')}:00`;
+    else if (groupBy === 'daily') key = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+    else if (groupBy === 'monthly') key = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+    else key = `${d.getFullYear()}`;
+    if (!map[key]) map[key] = { sum: 0, count: 0 };
+    map[key].sum += Number(r[sensorKey]);
+    map[key].count++;
+  }
+  return Object.keys(map).sort().map(k => ({ label: k, value: map[k].sum / map[k].count }));
+}
+
+function calcAverages(records) {
+  const ok = records.filter(r => r.sensorOk === true);
+  const avg = (k) => {
+    const arr = ok.map(r => Number(r[k])).filter(v => Number.isFinite(v));
+    return arr.length ? round2(arr.reduce((a,b)=>a+b,0) / arr.length) : '-';
+  };
+  el('avgTemp').textContent = avg('temp');
+  el('avgHum').textContent = avg('hum');
+  el('avgLdr').textContent = avg('ldr');
+  el('recordCount').textContent = String(ok.length);
+}
+
+async function listDevices() {
+  setStatus('Loading devices...');
+  const snap = await get(ref(db, 'devices'));
+  const sel = el('deviceSelect');
+  sel.innerHTML = '';
+  if (!snap.exists()) {
+    sel.innerHTML = '<option value="">No devices</option>';
+    setStatus('No devices found', true);
+    return;
+  }
+  const data = snap.val();
+  Object.keys(data).sort().forEach(deviceId => {
+    const name = data[deviceId]?.meta?.deviceName || deviceId;
+    const opt = document.createElement('option');
+    opt.value = deviceId;
+    opt.textContent = `${name} (${deviceId})`;
+    sel.appendChild(opt);
+  });
+  currentDeviceId = sel.value || '';
+  el('devicePathInfo').textContent = currentDeviceId ? `Path: devices/${currentDeviceId}` : 'Path: -';
+  setStatus('Devices loaded');
+  if (currentDeviceId) attachLive(currentDeviceId);
+}
+
+function clearLive() {
+  liveUnsubs.forEach(fn => { try { fn(); } catch(e){} });
+  liveUnsubs = [];
+}
+
+function attachLive(deviceId) {
+  clearLive();
+  currentDeviceId = deviceId;
+  el('devicePathInfo').textContent = `Path: devices/${deviceId}`;
+
+  liveUnsubs.push(onValue(ref(db, `devices/${deviceId}/meta`), (snap) => {
+    const v = snap.val() || {};
+    el('deviceName').value = v.deviceName || deviceId;
+    el('currentVersion').value = v.firmwareVersion || '';
+    el('lastSeen').value = fmtTs(v.lastSeen || 0);
+  }));
+
+  liveUnsubs.push(onValue(ref(db, `devices/${deviceId}/state`), (snap) => {
+    const v = snap.val() || {};
+    el('currentVersion').value = v.firmwareVersion || el('currentVersion').value;
+    el('lastSeen').value = fmtTs(v.lastSeen || 0) || el('lastSeen').value;
+    el('sensorStatus').value = v.sensorOk === true ? 'OK' : (v.error || 'FAIL/UNKNOWN');
+    el('lightFault').value = v.lightFault ? 'YES' : 'NO';
+  }));
+
+  liveUnsubs.push(onValue(ref(db, `devices/${deviceId}/desired`), (snap) => {
+    const v = snap.val() || {};
+    el('targetVersion').value = v.targetVersion || '';
+    el('relay1Mode').value = v.relay1Mode || 'Temperature_based';
+    el('relay2Mode').value = v.relay2Mode || 'Temperature_based';
+    el('relay1Manual').value = String(v.relay1Manual ? 1 : 0);
+    el('relay2Manual').value = String(v.relay2Manual ? 1 : 0);
+    el('ifTemp1').value = v.ifTemp1 ?? v.iftemperature1 ?? '';
+    el('ifTemp2').value = v.ifTemp2 ?? v.iftemperature2 ?? '';
+  }));
+
+  loadRecentTable();
+  loadAnalytics();
+}
+
+async function saveMeta() {
+  if (!currentDeviceId) return;
+  const deviceName = el('deviceName').value.trim();
+  const targetVersion = el('targetVersion').value.trim();
+  await update(ref(db, `devices/${currentDeviceId}/meta`), { deviceName });
+  await update(ref(db, `devices/${currentDeviceId}/desired`), { targetVersion, updatedAt: Math.floor(Date.now() / 1000) });
+  setStatus('Meta and target version saved');
+}
+
+async function saveRelay() {
+  if (!currentDeviceId) return;
+  const payload = {
+    relay1Mode: el('relay1Mode').value,
+    relay2Mode: el('relay2Mode').value,
+    relay1Manual: Number(el('relay1Manual').value) === 1,
+    relay2Manual: Number(el('relay2Manual').value) === 1,
+    ifTemp1: Number(el('ifTemp1').value || 0),
+    ifTemp2: Number(el('ifTemp2').value || 0),
+    updatedAt: Math.floor(Date.now() / 1000)
+  };
+  await update(ref(db, `devices/${currentDeviceId}/desired`), payload);
+  setStatus('Relay settings saved');
+}
+
+async function loadRecentTable() {
+  if (!currentDeviceId) return;
+  const month = yyyymmFromDate(new Date());
+  const q = query(ref(db, `telemetry/${currentDeviceId}/${month}`), limitToLast(50));
+  const snap = await get(q);
+  const body = el('recentBody');
+  body.innerHTML = '';
+  if (!snap.exists()) {
+    body.innerHTML = '<tr><td colspan="9" class="muted">No recent data</td></tr>';
+    return;
+  }
+  const rows = Object.values(snap.val()).sort((a,b)=>(b.ts||0)-(a.ts||0));
+  for (const r of rows) {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${fmtTs(r.ts)}</td>
+      <td>${r.temp ?? '-'}</td>
+      <td>${r.hum ?? '-'}</td>
+      <td>${r.ldr ?? '-'}</td>
+      <td>${r.relay1 ? 'ON' : 'OFF'}</td>
+      <td>${r.relay2 ? 'ON' : 'OFF'}</td>
+      <td>${r.sensorOk === true ? 'YES' : 'NO'}</td>
+      <td>${r.error || ''}</td>
+      <td>${r.lightFault ? 'YES' : 'NO'}</td>`;
+    body.appendChild(tr);
+  }
+}
+
+async function fetchTelemetryRange(deviceId, fromDateStr, toDateStr) {
+  const from = Math.floor(new Date(fromDateStr + 'T00:00:00').getTime() / 1000);
+  const to = Math.floor(new Date(toDateStr + 'T23:59:59').getTime() / 1000);
+  const months = monthKeysBetween(new Date(fromDateStr + 'T00:00:00'), new Date(toDateStr + 'T00:00:00'));
+  let out = [];
+  for (const m of months) {
+    const snap = await get(ref(db, `telemetry/${deviceId}/${m}`));
+    if (!snap.exists()) continue;
+    Object.values(snap.val()).forEach(v => {
+      if (!v || typeof v.ts !== 'number') return;
+      if (v.ts >= from && v.ts <= to) out.push(v);
     });
+  }
+  return out.sort((a,b)=>a.ts-b.ts);
+}
 
-    saveFirmwareBtn.addEventListener("click", async () => {
-      const value = newFirmware.value.trim();
-      if (!value) {
-        firmwareStatus.textContent = "Enter a firmware version.";
-        firmwareStatus.className = "status danger";
-        return;
-      }
+async function loadAnalytics() {
+  if (!currentDeviceId) return;
+  setStatus('Loading chart data...');
+  const rows = await fetchTelemetryRange(currentDeviceId, el('fromDate').value, el('toDate').value);
+  calcAverages(rows);
+  const sensorKey = el('sensorType').value;
+  const okRows = rows.filter(r => r.sensorOk === true && Number.isFinite(Number(r[sensorKey])));
+  const aggregated = aggregate(okRows, sensorKey, el('groupBy').value);
+  const labels = aggregated.map(x => x.label);
+  const values = aggregated.map(x => round2(x.value));
 
-      try {
-        await set(ref(db, "config/target_firmware"), value);
-        firmwareStatus.textContent = "Firmware version updated.";
-        firmwareStatus.className = "status ok";
-      } catch (err) {
-        firmwareStatus.textContent = `Save failed: ${err.message}`;
-        firmwareStatus.className = "status danger";
-      }
-    });
-
-    onValue(ref(db, "devices"), (snap) => {
-      const devices = snap.val() || {};
-      const prev = deviceSelect.value;
-      deviceSelect.innerHTML = "";
-
-      const ids = Object.keys(devices).sort();
-      if (ids.length === 0) {
-        const opt = document.createElement("option");
-        opt.value = "";
-        opt.textContent = "No devices yet";
-        deviceSelect.appendChild(opt);
-        renderEmpty();
-        return;
-      }
-
-      ids.forEach((id) => {
-        const opt = document.createElement("option");
-        opt.value = id;
-        opt.textContent = devices[id]?.meta?.name || id;
-        deviceSelect.appendChild(opt);
-      });
-
-      if (ids.includes(prev)) deviceSelect.value = prev;
-      loadCurrentCard();
-      loadAnalytics();
-    });
-
-    function syncPickers() {
-      hourlyPickerWrap.classList.toggle("hidden", viewMode.value !== "hourly");
-      dailyPickerWrap.classList.toggle("hidden", viewMode.value !== "daily");
-      monthlyPickerWrap.classList.toggle("hidden", viewMode.value !== "monthly");
+  if (chart) chart.destroy();
+  chart = new Chart(el('chart').getContext('2d'), {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [{ label: `${sensorKey} (${el('groupBy').value})`, data: values, borderWidth: 2, tension: 0.2 }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: true,
+      plugins: { legend: { display: true } },
+      scales: { x: { ticks: { maxTicksLimit: 12 } }, y: { beginAtZero: false } }
     }
+  });
+  setStatus(`Loaded ${okRows.length} valid records`);
+}
 
-    viewMode.addEventListener("change", () => {
-      syncPickers();
-      loadAnalytics();
-    });
+el('fromDate').value = todayStr();
+el('toDate').value = todayStr();
+el('deviceSelect').addEventListener('change', (e) => attachLive(e.target.value));
+el('saveMetaBtn').addEventListener('click', saveMeta);
+el('saveRelayBtn').addEventListener('click', saveRelay);
+el('loadBtn').addEventListener('click', loadAnalytics);
+el('loadRecentBtn').addEventListener('click', loadRecentTable);
+el('refreshNowBtn').addEventListener('click', () => currentDeviceId && attachLive(currentDeviceId));
 
-    metricSelect.addEventListener("change", loadAnalytics);
-    deviceSelect.addEventListener("change", () => {
-      loadCurrentCard();
-      loadAnalytics();
-    });
-    hourlyDate.addEventListener("change", loadAnalytics);
-    dailyMonth.addEventListener("change", loadAnalytics);
-    monthlyYear.addEventListener("change", loadAnalytics);
-    loadBtn.addEventListener("click", loadAnalytics);
-
-    syncPickers();
-
-    function formatDateTime(ms) {
-      if (!ms) return "-";
-      const d = new Date(Number(ms));
-      return d.toLocaleString();
-    }
-
-    function metricLabel(metric) {
-      if (metric === "temperature") return "Temperature";
-      if (metric === "humidity") return "Humidity";
-      return "Light Status";
-    }
-
-    function avg(arr) {
-      if (!arr.length) return 0;
-      return arr.reduce((a, b) => a + b, 0) / arr.length;
-    }
-
-    function sortKeys(obj) {
-      return Object.keys(obj || {}).sort((a, b) => a.localeCompare(b));
-    }
-
-    function renderChart(labels, values, metric) {
-      const ctx = document.getElementById("chart").getContext("2d");
-      if (chartInstance) chartInstance.destroy();
-
-      chartInstance = new Chart(ctx, {
-        type: "line",
-        data: {
-          labels,
-          datasets: [{
-            label: metricLabel(metric),
-            data: values,
-            tension: 0.25
-          }]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: true
-        }
-      });
-    }
-
-    function renderTable(headers, rows) {
-      if (!rows.length) {
-        tableWrap.innerHTML = "<p>No data found for that selection.</p>";
-        return;
-      }
-
-      let html = "<table><thead><tr>";
-      headers.forEach(h => html += `<th>${h}</th>`);
-      html += "</tr></thead><tbody>";
-
-      rows.forEach(row => {
-        html += "<tr>";
-        row.forEach(cell => html += `<td>${cell}</td>`);
-        html += "</tr>";
-      });
-
-      html += "</tbody></table>";
-      tableWrap.innerHTML = html;
-    }
-
-    function renderEmpty() {
-      analyticsStatus.textContent = "No device data found.";
-      cardTemp.textContent = "-";
-      cardHumidity.textContent = "-";
-      cardLight.textContent = "-";
-      cardLastSeen.textContent = "-";
-      if (chartInstance) chartInstance.destroy();
-      tableWrap.innerHTML = "";
-    }
-
-    async function loadCurrentCard() {
-      const deviceId = deviceSelect.value;
-      if (!deviceId) return;
-
-      try {
-        const [metaSnap, currentSnap] = await Promise.all([
-          get(ref(db, `devices/${deviceId}/meta`)),
-          get(ref(db, `devices/${deviceId}/current`))
-        ]);
-
-        const meta = metaSnap.val() || {};
-        const current = currentSnap.val() || {};
-
-        cardTemp.textContent = current.temperature ?? "-";
-        cardHumidity.textContent = current.humidity ?? "-";
-        cardLight.textContent = current.light_status ?? "-";
-        cardLastSeen.textContent = formatDateTime(meta.last_seen || current.timestamp);
-      } catch (err) {
-        analyticsStatus.textContent = `Current data load failed: ${err.message}`;
-        analyticsStatus.className = "status danger";
-      }
-    }
-
-    async function loadAnalytics() {
-      const deviceId = deviceSelect.value;
-      if (!deviceId) {
-        renderEmpty();
-        return;
-      }
-
-      analyticsStatus.textContent = "Loading...";
-      analyticsStatus.className = "status";
-
-      try {
-        if (viewMode.value === "hourly") {
-          await loadHourly(deviceId);
-        } else if (viewMode.value === "daily") {
-          await loadDaily(deviceId);
-        } else {
-          await loadMonthly(deviceId);
-        }
-        analyticsStatus.textContent = "Loaded";
-        analyticsStatus.className = "status ok";
-      } catch (err) {
-        analyticsStatus.textContent = `Load failed: ${err.message}`;
-        analyticsStatus.className = "status danger";
-      }
-    }
-
-    async function loadHourly(deviceId) {
-      const [y, m, d] = hourlyDate.value.split("-");
-      const snap = await get(ref(db, `devices/${deviceId}/readings/${y}/${m}/${d}`));
-      const dayData = snap.val() || {};
-      const metric = metricSelect.value;
-
-      const labels = [];
-      const values = [];
-      const rows = [];
-
-      sortKeys(dayData).forEach(slot => {
-        const r = dayData[slot];
-        const label = `${slot.slice(0,2)}:${slot.slice(2,4)}`;
-        labels.push(label);
-        values.push(Number(r[metric] ?? 0));
-        rows.push([
-          label,
-          r.temperature ?? "",
-          r.humidity ?? "",
-          r.light_status ?? "",
-          formatDateTime(r.timestamp)
-        ]);
-      });
-
-      renderChart(labels, values, metric);
-      renderTable(
-        ["Time", "Temperature", "Humidity", "Light Status", "Timestamp"],
-        rows
-      );
-    }
-
-    async function loadDaily(deviceId) {
-      const [y, m] = dailyMonth.value.split("-");
-      const snap = await get(ref(db, `devices/${deviceId}/readings/${y}/${m}`));
-      const monthData = snap.val() || {};
-      const metric = metricSelect.value;
-
-      const labels = [];
-      const values = [];
-      const rows = [];
-
-      sortKeys(monthData).forEach(day => {
-        const dayObj = monthData[day] || {};
-        const items = Object.values(dayObj);
-        if (!items.length) return;
-
-        const temps = items.map(x => Number(x.temperature ?? 0));
-        const hums  = items.map(x => Number(x.humidity ?? 0));
-        const lights = items.map(x => Number(x.light_status ?? 0));
-
-        const metricValue =
-          metric === "temperature" ? avg(temps) :
-          metric === "humidity" ? avg(hums) :
-          avg(lights);
-
-        labels.push(day);
-        values.push(metricValue);
-
-        rows.push([
-          `${y}-${m}-${day}`,
-          avg(temps).toFixed(2),
-          avg(hums).toFixed(2),
-          avg(lights).toFixed(2),
-          items.length
-        ]);
-      });
-
-      renderChart(labels, values, metric);
-      renderTable(
-        ["Date", "Avg Temperature", "Avg Humidity", "Avg Light Status", "Records"],
-        rows
-      );
-    }
-
-    async function loadMonthly(deviceId) {
-      const y = String(monthlyYear.value).trim();
-      const snap = await get(ref(db, `devices/${deviceId}/readings/${y}`));
-      const yearData = snap.val() || {};
-      const metric = metricSelect.value;
-
-      const labels = [];
-      const values = [];
-      const rows = [];
-
-      sortKeys(yearData).forEach(month => {
-        const monthObj = yearData[month] || {};
-        const allItems = [];
-
-        sortKeys(monthObj).forEach(day => {
-          const dayObj = monthObj[day] || {};
-          sortKeys(dayObj).forEach(slot => {
-            allItems.push(dayObj[slot]);
-          });
-        });
-
-        if (!allItems.length) return;
-
-        const temps = allItems.map(x => Number(x.temperature ?? 0));
-        const hums  = allItems.map(x => Number(x.humidity ?? 0));
-        const lights = allItems.map(x => Number(x.light_status ?? 0));
-
-        const metricValue =
-          metric === "temperature" ? avg(temps) :
-          metric === "humidity" ? avg(hums) :
-          avg(lights);
-
-        labels.push(month);
-        values.push(metricValue);
-
-        rows.push([
-          `${y}-${month}`,
-          avg(temps).toFixed(2),
-          avg(hums).toFixed(2),
-          avg(lights).toFixed(2),
-          allItems.length
-        ]);
-      });
-
-      renderChart(labels, values, metric);
-      renderTable(
-        ["Month", "Avg Temperature", "Avg Humidity", "Avg Light Status", "Records"],
-        rows
-      );
-    }
-  </script>
+listDevices().catch(err => {
+  console.error(err);
+  setStatus('Failed to load devices. Check firebaseConfig and public rules.', true);
+});
+</script>
 </body>
 </html>
